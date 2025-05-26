@@ -1,9 +1,9 @@
 # weblog-v0
 
-# penser à la validation des posts par l'admin
-# tables d'archives ?
-# voir navbar, news contact about
-# messages et notif (bonus)
+penser à la validation des posts par l'admin
+tables d'archives ?
+voir navbar, news contact about
+messages et notif (bonus)
 
 DRAFT Reprise du projet « weblog »
 Rapport du 24/05/2025 par Mikael Debray
