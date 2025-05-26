@@ -1,15 +1,87 @@
+
 <?php include('../config.php'); ?>
 <?php include(ROOT_PATH . '/includes/admin_functions.php'); ?>
 <?php include(ROOT_PATH . '/includes/admin/head_section.php'); ?>
-
-//BTW: ideally we need to create a role_user table (users<---->role_user<----->roles)
-	// role_user(id, user_id,role_id)
 <?php
-// Get all admin roles from DB : by admin roles i mean (Admin or Author)
-$roles = getAdminRoles(); // table roles
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Admin') {
+    header('Location: ../login.php');
+    exit;
+}
 
-// Get all admin users from DB
-$admins = getAdminUsers(); // by admin roles i mean (Admin or Author), table users
+
+$errors = [];
+$username = "";
+$email = "";
+$role_id = "";
+$isEditingUser = false;
+$admin_id = 0;
+
+// --- Gestion suppression ---
+if (isset($_GET['delete-admin'])) {
+    $admin_id = intval($_GET['delete-admin']);
+    deleteAdmin($admin_id);
+    header('Location: users.php');
+    exit;
+}
+
+// --- Gestion édition (préremplissage) ---
+if (isset($_GET['edit-admin'])) {
+    $isEditingUser = true;
+    $admin_id = intval($_GET['edit-admin']);
+    global $conn;
+    $res = $conn->query("SELECT * FROM users WHERE id=$admin_id LIMIT 1");
+    if ($res && $res->num_rows == 1) {
+        $admin = $res->fetch_assoc();
+        $username = $admin['username'];
+        $email = $admin['email'];
+        // Récupère le role_id via la table de jointure (role_user)
+        $role_q = $conn->query("SELECT role_id FROM role_user WHERE user_id=$admin_id LIMIT 1");
+        $role_id = ($role_q && $role_q->num_rows == 1) ? $role_q->fetch_assoc()['role_id'] : '';
+    }
+}
+
+// --- Gestion création et modification ---
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Si update, récupère bien l'id caché !
+    if (isset($_POST['admin_id'])) {
+        $admin_id = intval($_POST['admin_id']);
+        $isEditingUser = true;
+    }
+    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
+    $role_id = isset($_POST['role_id']) ? intval($_POST['role_id']) : '';
+    $password = $_POST['password'];
+    $passwordConfirmation = $_POST['passwordConfirmation'];
+
+    if (empty($username) || empty($email) || empty($password) || empty($passwordConfirmation) || empty($role_id)) {
+        $errors[] = "All fields required.";
+    }
+    if ($password !== $passwordConfirmation) {
+        $errors[] = "Passwords do not match.";
+    }
+    // Test unicité (username/email)
+    global $conn;
+    $check_sql = "SELECT id FROM users WHERE (username='$username' OR email='$email')";
+    if ($isEditingUser) $check_sql .= " AND id!=$admin_id";
+    $check = $conn->query($check_sql);
+    if ($check && $check->num_rows > 0) {
+        $errors[] = "Username or email already exists.";
+    }
+
+    if (empty($errors)) {
+        if ($isEditingUser && isset($_POST['update_admin'])) {
+            updateAdmin($admin_id, $username, $email, $role_id, $password);
+        } else {
+            createAdmin($username, $email, $role_id, $password);
+        }
+        header('Location: users.php');
+        exit;
+    }
+}
+
+// --- Récupération des rôles et admins ---
+$roles = getAdminRoles();
+$admins = getAdminUsers();
 ?>
 
 <title>Admin | Manage users</title>
@@ -27,17 +99,14 @@ $admins = getAdminUsers(); // by admin roles i mean (Admin or Author), table use
 			<h1 class="page-title">Create/Edit Admin User</h1>
 
 			<form method="post" action="<?php echo BASE_URL . 'admin/users.php'; ?>">
-
-				<!-- validation errors for the form -->
-				<?php include(ROOT_PATH . '/includes/public/errors.php') ?>
-
-				<!-- if editing user, the id is required to identify that user -->
-				<?php if ($isEditingUser === true) : ?>
-					<input type="hidden" name="admin_id" value="<?php echo $admin_id; ?>">
-				<?php endif ?>
+			<?php if ($isEditingUser) : ?>
+				<input type="hidden" name="admin_id" value="<?php echo $admin_id; ?>">
+			<?php endif ?>
+				<?php if (!empty($errors)): ?>
+					<div style="color:red;"><?php foreach($errors as $e) echo $e."<br>"; ?></div>
+				<?php endif; ?>
 
 				<input type="text" name="username" value="<?php echo $username; ?>" placeholder="Username">
-
 				<input type="email" name="email" value="<?php echo $email ?>" placeholder="Email">
 				<input type="password" name="password" placeholder="Password">
 				<input type="password" name="passwordConfirmation" placeholder="Password confirmation">
@@ -45,27 +114,22 @@ $admins = getAdminUsers(); // by admin roles i mean (Admin or Author), table use
 				<select name="role_id">
 					<option value="" selected disabled>Assign role</option>
 					<?php foreach ($roles as $role) : ?>
-						<option value="<?php echo $role['id']; ?>">
+						<option value="<?php echo $role['id']; ?>" <?php if ($role_id == $role['id']) echo "selected"; ?>>
 							<?php echo $role['role']; ?>
 						</option>
 					<?php endforeach ?>
 				</select>
-
-				<!-- if editing user, display the update button instead of create button -->
-				<?php if ($isEditingUser === true) : ?>
+				<?php if ($isEditingUser) : ?>
 					<button type="submit" class="btn" name="update_admin">UPDATE</button>
 				<?php else : ?>
 					<button type="submit" class="btn" name="create_admin">Save User</button>
 				<?php endif ?>
-
 			</form>
 		</div>
 		<!-- // Middle form - to create and edit -->
 
 		<!-- Display records from DB-->
 		<div class="table-div">
-
-			<!-- Display notification message -->
 			<?php include(ROOT_PATH . '/includes/public/messages.php') ?>
 
 			<?php if (empty($admins)) : ?>
@@ -88,12 +152,10 @@ $admins = getAdminUsers(); // by admin roles i mean (Admin or Author), table use
 								</td>
 								<td><?php echo $admin['role']; ?></td>
 								<td>
-									<a class="fa fa-pencil btn edit" href="users.php?edit-admin=<?php echo $admin['id'] ?>">
-									</a>
+									<a class="fa fa-pencil btn edit" href="users.php?edit-admin=<?php echo $admin['id'] ?>"></a>
 								</td>
 								<td>
-									<a class="fa fa-trash btn delete" href="users.php?delete-admin=<?php echo $admin['id'] ?>">
-									</a>
+									<a class="fa fa-trash btn delete" href="users.php?delete-admin=<?php echo $admin['id'] ?>" onclick="return confirm('Delete this user?');"></a>
 								</td>
 							</tr>
 						<?php endforeach ?>
@@ -102,9 +164,6 @@ $admins = getAdminUsers(); // by admin roles i mean (Admin or Author), table use
 			<?php endif ?>
 		</div>
 		<!-- // Display records from DB -->
-
 	</div>
-
 </body>
-
 </html>
