@@ -10,6 +10,8 @@ if (!isset($_SESSION['user']) || !in_array($_SESSION['user']['role'], ['Admin', 
     exit;
 }
 
+
+
 // Initialisation variables formulaire
 $title = "";
 $body = "";
@@ -66,6 +68,8 @@ if (isset($_POST['create_post'])) {
     }
 
     if (empty($errors)) {
+        $isAdmin = (isset($_SESSION['user']) && $_SESSION['user']['role'] == 'Admin');
+        $published = $isAdmin ? 1 : 0;
         $sql = "INSERT INTO posts (user_id, title, slug, image, body, published, created_at) VALUES ($user_id, '$title', '$slug', '$image', '$body', 1, NOW())";
         $conn->query($sql);
         $new_post_id = $conn->insert_id;
@@ -118,6 +122,7 @@ if (isset($_POST['update_post'])) {
 <body>
 
 	<!-- admin navbar -->
+
 	<?php include(ROOT_PATH . '/includes/admin/header.php') ?>
 
 	<div class="container content">

@@ -24,14 +24,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errors[] = "User or email already exists.";
     }
 
-    // Si pas d’erreurs, insert
-    if (empty($errors)) {
-        $pwd = md5($password); // Pour aller vite
-        $conn->query("INSERT INTO users (username, email, role, password, created_at) VALUES ('$username', '$email', 'Author', '$pwd', NOW())");
-        $_SESSION['user'] = ['username' => $username, 'role' => 'Author'];
-        header('Location: index.php');
-        exit;
-    }
+    
+    // Après avoir check les erreurs
+if (empty($errors)) {
+    $pwd = md5($password);
+
+    // 1. Insérer l'utilisateur sans champ 'role'
+    $conn->query("INSERT INTO users (username, email, password, created_at) VALUES ('$username', '$email', '$pwd', NOW())");
+    $user_id = $conn->insert_id;
+
+    // 2. Associer l'utilisateur au rôle 'Author'
+    $res = $conn->query("SELECT id FROM roles WHERE name='Author' LIMIT 1");
+    $role_id = $res->fetch_assoc()['id'];
+    $conn->query("INSERT INTO role_user (user_id, role_id) VALUES ($user_id, $role_id)");
+
+    // 3. Démarre session
+    $_SESSION['user'] = ['id' => $user_id, 'username' => $username, 'role' => 'Author'];
+
+    header('Location: index.php');
+    exit;
+}
+
 }
 ?>
 
@@ -40,7 +53,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body>
 <div class="container">
-<?php include(ROOT_PATH . '/includes/public/navbar.php'); ?>
+<?php
+	if (session_status() == PHP_SESSION_NONE) session_start();
+
+	if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'Admin') {
+		include(ROOT_PATH . '/includes/admin/navbar.php');
+	} else {
+		include(ROOT_PATH . '/includes/public/navbar.php');
+	}
+?>
 
     <form method="post" action="register.php" style="width:40%;margin:30px auto;">
         <h2>Register</h2>

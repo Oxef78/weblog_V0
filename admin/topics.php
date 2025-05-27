@@ -1,7 +1,7 @@
 <?php include('../config.php'); ?>
 <?php include(ROOT_PATH . '/includes/admin_functions.php'); ?>
 <?php include(ROOT_PATH . '/includes/admin/head_section.php'); ?>
-<?php
+<?php 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Admin') {
     header('Location: ../login.php');
     exit;

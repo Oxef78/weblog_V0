@@ -1,8 +1,9 @@
 
 <?php include('../config.php'); ?>
 <?php include(ROOT_PATH . '/includes/admin_functions.php'); ?>
+<?php include(ROOT_PATH . '/includes/all_functions.php'); ?>
 <?php include(ROOT_PATH . '/includes/admin/head_section.php'); ?>
-<?php
+<?php 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Admin') {
     header('Location: ../login.php');
     exit;
@@ -89,6 +90,8 @@ $admins = getAdminUsers();
 
 <body>
 	<!-- admin navbar -->
+
+
 	<?php include(ROOT_PATH . '/includes/admin/header.php') ?>
 	<div class="container content">
 		<!-- Left side menu -->

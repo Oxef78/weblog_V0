@@ -44,6 +44,8 @@ function getPostsByAuthor($user_id) {
 function createPost($user_id, $title, $slug, $body, $image, $topic_id, $published=1) {
     global $conn;
     // Gérer l’upload image ici si besoin
+    $isAdmin = (isset($_SESSION['user']) && $_SESSION['user']['role'] == 'Admin');
+    $published = $isAdmin ? 1 : 0;
     $conn->query("INSERT INTO posts (user_id, title, slug, body, image, published, created_at) VALUES ('$user_id', '$title', '$slug', '$body', '$image', '$published', NOW())");
     $post_id = $conn->insert_id;
     $conn->query("INSERT INTO post_topic (post_id, topic_id) VALUES ('$post_id', '$topic_id')");

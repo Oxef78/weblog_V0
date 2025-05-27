@@ -1,14 +1,14 @@
 <?php include('config.php'); ?>
 <?php include('includes/all_functions.php'); ?>
 <?php include('includes/public/head_section.php'); ?>
-<?php
+<?php include('includes/public/registration_login.php');
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login_btn'])) {
     // le code de vérif comme vu plus haut...
 }
 ?>
 
-<title>MyWebSite | Home </title>
+<title>WeblogResurrected | Home </title>
 
 
 </head>
@@ -18,7 +18,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login_btn'])) {
 	<div class="container">
 
 		<!-- Navbar -->
-		<?php include(ROOT_PATH . '/includes/public/navbar.php'); ?>
+		<?php
+		if (session_status() == PHP_SESSION_NONE) session_start();
+
+		if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'Admin') {
+			include(ROOT_PATH . '/includes/admin/navbar.php');
+		} else {
+			include(ROOT_PATH . '/includes/public/navbar.php');
+		}
+		?>
 		<!-- // Navbar -->
 
 		<!-- Banner -->

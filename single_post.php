@@ -4,11 +4,19 @@ include('includes/all_functions.php');
 include('includes/public/head_section.php'); 
 ?>
 
-<title>MyWebSite | Article</title>
+<title>WeblogResurrected | Article</title>
 </head>
 <body>
 <div class="container">
-    <?php include(ROOT_PATH . '/includes/public/navbar.php'); ?>
+    <?php
+	if (session_status() == PHP_SESSION_NONE) session_start();
+
+	if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'Admin') {
+		include(ROOT_PATH . '/includes/admin/navbar.php');
+	} else {
+		include(ROOT_PATH . '/includes/public/navbar.php');
+	}
+	?>
     <?php 
         if (isset($_GET['id'])) {
             $post = getPostById($_GET['id']);
