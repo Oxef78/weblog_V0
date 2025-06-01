@@ -6,7 +6,7 @@ voir navbar, news contact about ;
 messages et notif (bonus)
 mdp n'est pas chiffré pendant le login;
 
-mieux gerer a session si temps
+mieux gerer la session si temps
 
 
 --> prévoir tests fonctionnels pour tout..

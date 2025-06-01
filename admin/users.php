@@ -1,6 +1,7 @@
 
 <?php include('../config.php'); ?>
-<?php include(ROOT_PATH . '/includes/admin_functions.php'); ?>
+
+<?php include(ROOT_PATH . '/admin/admin_functions.php');  ?>
 <?php include(ROOT_PATH . '/includes/all_functions.php'); ?>
 <?php include(ROOT_PATH . '/includes/admin/head_section.php'); ?>
 <?php 
@@ -21,6 +22,7 @@ $admin_id = 0;
 if (isset($_GET['delete-admin'])) {
     $admin_id = intval($_GET['delete-admin']);
     deleteAdmin($admin_id);
+    $_SESSION['message'] = "L'utilisateur a bien été supprimé.";
     header('Location: users.php');
     exit;
 }
@@ -43,7 +45,6 @@ if (isset($_GET['edit-admin'])) {
 
 // --- Gestion création et modification ---
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Si update, récupère bien l'id caché !
     if (isset($_POST['admin_id'])) {
         $admin_id = intval($_POST['admin_id']);
         $isEditingUser = true;
@@ -70,14 +71,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (empty($errors)) {
-        if ($isEditingUser && isset($_POST['update_admin'])) {
-            updateAdmin($admin_id, $username, $email, $role_id, $password);
-        } else {
-            createAdmin($username, $email, $role_id, $password);
-        }
-        header('Location: users.php');
-        exit;
+    if ($isEditingUser && isset($_POST['update_admin'])) {
+        updateAdmin($admin_id, $username, $email, $role_id, $password);
+        $_SESSION['message'] = "Utilisateur modifié avec succès.";
+    } else {
+        createAdmin($username, $email, $role_id, $password);
+        $_SESSION['message'] = "Nouvel utilisateur créé avec succès.";
     }
+    header('Location: users.php');
+    exit;
+}
 }
 
 // --- Récupération des rôles et admins ---

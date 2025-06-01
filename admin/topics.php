@@ -1,5 +1,5 @@
 <?php include('../config.php'); ?>
-<?php include(ROOT_PATH . '/includes/admin_functions.php'); ?>
+<?php include(ROOT_PATH . '/admin/admin_functions.php');  ?>
 <?php include(ROOT_PATH . '/includes/admin/head_section.php'); ?>
 <?php 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Admin') {
@@ -17,6 +17,7 @@ $errors = [];
 if (isset($_GET['delete-topic'])) {
     $topic_id = intval($_GET['delete-topic']);
     deleteTopic($topic_id);
+    $_SESSION['message'] = "Sujet supprimé avec succès.";
     header('Location: topics.php');
     exit;
 }
@@ -39,6 +40,9 @@ if (isset($_GET['edit-topic'])) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = trim($_POST['name']);
     $slug = trim($_POST['slug']);
+    // On récupère le topic_id si c’est une édition (sinon 0)
+    $topic_id = isset($_POST['topic_id']) ? intval($_POST['topic_id']) : 0;
+    $isEditingTopic = $topic_id > 0;
 
     if (empty($name) || empty($slug)) {
         $errors[] = "All fields required.";
@@ -46,13 +50,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($errors)) {
         if ($isEditingTopic && isset($_POST['update_topic'])) {
             updateTopic($topic_id, $name, $slug);
+            $_SESSION['message'] = "Sujet modifié avec succès.";
         } else {
             createTopic($name, $slug);
+            $_SESSION['message'] = "Nouveau sujet créé avec succès.";
         }
         header('Location: topics.php');
         exit;
     }
 }
+
 
 // Liste des topics
 $topics = getAllTopics();
@@ -64,9 +71,13 @@ $topics = getAllTopics();
 <?php include(ROOT_PATH . '/includes/admin/header.php'); ?>
 <div class="container content">
     <?php include(ROOT_PATH . '/includes/admin/menu.php'); ?>
+    
     <div class="action">
         <h1 class="page-title"><?php echo $isEditingTopic ? 'Edit' : 'Create'; ?> Topic</h1>
         <form method="post" action="topics.php">
+            <?php if ($isEditingTopic): ?>
+                <input type="hidden" name="topic_id" value="<?php echo $topic_id; ?>">
+            <?php endif; ?>
             <?php if (!empty($errors)): ?><div style="color:red;"><?php foreach($errors as $e) echo $e."<br>"; ?></div><?php endif; ?>
             <input type="text" name="name" placeholder="Topic name" value="<?php echo htmlspecialchars($name); ?>">
             <input type="text" name="slug" placeholder="Slug" value="<?php echo htmlspecialchars($slug); ?>">
@@ -77,10 +88,13 @@ $topics = getAllTopics();
             <?php endif; ?>
         </form>
     </div>
+
     <div class="table-div">
         <h2>All Topics</h2>
         <table class="table">
             <thead>
+                <?php include(ROOT_PATH . '/includes/public/messages.php'); ?>
+
                 <th>#</th><th>Name</th><th>Slug</th><th colspan="2">Actions</th>
             </thead>
             <tbody>

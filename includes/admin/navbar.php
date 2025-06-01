@@ -4,7 +4,7 @@
 	</div>
 	<ul>
 	  <li><a class="active" href="index.php">Home</a></li>
-	  <li><a href="filtered_posts.php">Rechercher un article</a></li>
+	  <li><a href="filtered_posts.php">Articles par thême</a></li>
 	  <li><a href="admin/dashboard.php">Dashboard</a></li>
 	  <li><a href="#news">News</a></li>
 	  <li><a href="#contact">Contact</a></li>

@@ -1,6 +1,6 @@
 <?php
 include('../config.php');
-include(ROOT_PATH . '/includes/admin_functions.php');
+include(ROOT_PATH . '/admin/admin_functions.php'); 
 if (session_status() == PHP_SESSION_NONE) session_start();
 
 
@@ -39,11 +39,7 @@ $total_topics = $conn->query("SELECT COUNT(*) as nb FROM topics")->fetch_assoc()
         </div>
         <?php if (isset($_SESSION['user'])) : ?>
 		<a class="active" href="../index.php">Home</a>
-        <a href="../filtered_posts.php">Rechercher un article</a>
-        <a href="dashboard.php">Dashboard</a>
-        <a href="#">News</a>
-        <a href="#">Contact</a>
-        <a href="#">About</a>
+        <a href="../filtered_posts.php">Articles par thême</a>
         <div class="user-info">
             <span><?php echo htmlspecialchars($_SESSION['user']['username']); ?></span>
             <a href="<?php echo BASE_URL . '/logout.php'; ?>" class="logout-btn">logout</a>
@@ -55,7 +51,7 @@ $total_topics = $conn->query("SELECT COUNT(*) as nb FROM topics")->fetch_assoc()
         <div class="stats">
             <a href="users.php" class="first">
                 <span><?php echo $total_users; ?></span> <br>
-                <span>Newly registered users</span>
+                <span>Registered users</span>
             </a>
             <a href="posts.php">
                 <span><?php echo $total_posts; ?></span> <br>
@@ -70,6 +66,7 @@ $total_topics = $conn->query("SELECT COUNT(*) as nb FROM topics")->fetch_assoc()
         <div class="buttons">
             <a href="users.php">Add Users</a>
             <a href="posts.php">Add Posts</a>
+            <a href="topics.php">Add Topics</a>
         </div>
     </div>
 </body>

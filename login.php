@@ -18,6 +18,9 @@ if (isset($_SESSION['user'])) {
             include('includes/public/navbar.php');
         }
         ?>
+        <!-- Messages -->
+        <?php include('includes/public/messages.php'); ?>
+        <!-- // Messages -->
         <div style="width: 40%; margin: 20px auto;">
             <form method="post" action="login.php">
                 <h2>Login</h2>

@@ -1,15 +1,10 @@
 <?php
 include('config.php');
 include(ROOT_PATH . '/includes/all_functions.php');
-include(ROOT_PATH . '/includes/admin_functions.php'); 
+include(ROOT_PATH . '/admin/admin_functions.php'); 
 include(ROOT_PATH . '/includes/public/head_section.php');
 if (session_status() == PHP_SESSION_NONE) session_start();
 
-if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'Admin') {
-    include(ROOT_PATH . '/includes/admin/navbar.php');
-} else {
-    include(ROOT_PATH . '/includes/public/navbar.php');
-}
 
 $title = "Filtered Posts";
 $filters = [];
@@ -21,9 +16,6 @@ if (!empty($_GET['topic_id'])) {
 if (!empty($_GET['author_id'])) {
     $filters['author_id'] = intval($_GET['author_id']);
 }
-if (!empty($_GET['search'])) {
-    $filters['search'] = trim($_GET['search']);
-}
 $filters['published'] = 1; // Afficher seulement les posts publiés (pour public)
 
 // Récupération des posts filtrés
@@ -31,18 +23,20 @@ $posts = getFilteredPosts($filters);
 
 // Pour afficher la liste des topics et auteurs (pour les filtres dans le menu)
 $topics = getAllTopics();
-foreach ($topics as $t) {
-    echo "<a href='?topic_id={$t['id']}'>{$t['name']}</a> ";
-}
 $authors = getAdminUsers(); 
 ?>
 
 <title><?php echo $title; ?></title>
 </head>
 <body>
-
-
     <div class="container">
+        <?php
+        if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'Admin') {
+            include(ROOT_PATH . '/includes/admin/navbar.php');
+        } else {
+            include(ROOT_PATH . '/includes/public/navbar.php');
+        }
+        ?>
         <h1>Articles filtrés</h1>
 
         <!-- Barre de filtres -->
@@ -63,7 +57,6 @@ $authors = getAdminUsers();
                     </option>
                 <?php endforeach ?>
             </select>
-            <input type="text" name="search" placeholder="Recherche" value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
             <button type="submit">Filtrer</button>
         </form>
 
@@ -93,7 +86,6 @@ $authors = getAdminUsers();
             </table>
         <?php endif; ?>
     </div>
-
     <?php include(ROOT_PATH . '/includes/public/footer.php'); ?>
 </body>
 </html>

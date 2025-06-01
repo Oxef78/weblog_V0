@@ -4,7 +4,7 @@
 	</div>
 	<ul>
 	  <li><a class="active" href="index.php">Home</a></li>
-	  <li><a href="filtered_posts.php">Rechercher un article</a></li>
+	  <li><a href="filtered_posts.php">Articles par thême</a></li>
 
       <!-- menu des posts pour les auteurs -->
 	  <?php

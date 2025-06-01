@@ -1,5 +1,5 @@
 <?php
-$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+
 
 function getPublishedPosts() {
     global $conn;
@@ -14,16 +14,13 @@ function getPublishedPosts() {
 
 function getPostById($id) {
     global $conn;
-    $id = intval($id); // sécurité de base
+    $id = intval($id); // typing sécu
     $sql = "SELECT * FROM posts WHERE id = $id LIMIT 1";
     $result = $conn->query($sql);
     return $result->fetch_assoc();
 }
 
-/**
- * Récupère les posts filtrés (topic, auteur, mot-clé dans le titre, published, etc.)
- * $filters = ['topic_id' => 2, 'author_id' => 5, 'search' => 'mot', ...]
- */
+
 function getFilteredPosts($filters = []) {
     global $conn;
 
@@ -34,7 +31,6 @@ function getFilteredPosts($filters = []) {
             LEFT JOIN topics t ON pt.topic_id = t.id
             WHERE 1 ";
 
-    // Ajoute dynamiquement les filtres SANS refaire de JOIN
     if (!empty($filters['topic_id'])) {
         $topic_id = intval($filters['topic_id']);
         $sql .= " AND pt.topic_id = $topic_id ";
@@ -57,7 +53,6 @@ function getFilteredPosts($filters = []) {
     return $posts;
 }
 
-// Dans admin_functions.php ou all_functions.php
 function getAllUsers() {
     global $conn;
     $result = $conn->query("SELECT id, username FROM users ORDER BY username");
@@ -65,8 +60,5 @@ function getAllUsers() {
     while ($row = $result->fetch_assoc()) $users[] = $row;
     return $users;
 }
-
-
-
 ?>
 

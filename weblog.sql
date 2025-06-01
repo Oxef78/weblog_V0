@@ -151,8 +151,8 @@ CREATE TABLE `role_user` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`,  `password`, `created_at`, `updated_at`) VALUES
-(1, 'matthieu', 'info@sti.com',  '81dc9bdb52d04dc20036dbd8313ed055', '2018-01-08 11:52:58', '2018-01-08 11:52:58'),
-(2, 'jane', 'info@jane.com',  '81dc9bdb52d04dc20036dbd8313ed055', '2024-01-08 11:52:58', '2024-01-08 11:52:58');
+(1, 'matthieu', 'info@sti.com',  '$2y$10$lI.EAmwnpVbI39g2UUsrJOXPNPWJ/TbHF/W/Ixk5tG.nY1UrlAygG', '2018-01-08 11:52:58', '2018-01-08 11:52:58'),
+(2, 'jane', 'info@jane.com',  '$2y$10$lI.EAmwnpVbI39g2UUsrJOXPNPWJ/TbHF/W/Ixk5tG.nY1UrlAygG', '2024-01-08 11:52:58', '2024-01-08 11:52:58');
 
 -- Desormais on utilise cette table pour ajouter les roles utilisateurs
 INSERT INTO role_user (user_id, role_id) VALUES

@@ -1,5 +1,5 @@
 <?php include('../config.php'); ?>
-<?php include(ROOT_PATH . '/includes/admin_functions.php'); ?>
+<?php include(ROOT_PATH . '/admin/admin_functions.php');  ?>
 <?php include(ROOT_PATH . '/admin/post_functions.php'); ?>
 <?php include(ROOT_PATH . '/includes/admin/head_section.php'); ?>
 <?php
@@ -71,12 +71,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $slug = trim($_POST['slug']);
     $body = trim($_POST['body']);
     $topic_id = intval($_POST['topic_id']);
-    // Upload image simplifié (à améliorer si besoin)
     $image = isset($_FILES['image']) && $_FILES['image']['name'] ? $_FILES['image']['name'] : '';
     if ($image != '') move_uploaded_file($_FILES['image']['tmp_name'], ROOT_PATH.'/static/images/'.$image);
 
     if (empty($title) || empty($slug) || empty($body) || empty($topic_id)) {
         $errors[] = "All fields required.";
+    }
+
+    // Vérifier l'unicité du slug AVANT de créer OU modifier
+    if (!$isEditingPost) {
+        $check = $conn->query("SELECT id FROM posts WHERE slug='$slug' LIMIT 1");
+        if ($check && $check->num_rows > 0) {
+            $errors[] = "Ce slug existe déjà, choisissez-en un autre.";
+        }
+    } else {
+        $check = $conn->query("SELECT id FROM posts WHERE slug='$slug' AND id != $post_id LIMIT 1");
+        if ($check && $check->num_rows > 0) {
+            $errors[] = "Ce slug existe déjà pour un autre post.";
+        }
     }
 
     if (empty($errors)) {
